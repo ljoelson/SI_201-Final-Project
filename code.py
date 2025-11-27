@@ -35,6 +35,22 @@ def create_tables(conn):
     );
     """)
 
+    # flights table: main flight info; integer primary key = flight_id
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS Flights (
+        flight_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        flight_number TEXT,
+        airline TEXT,
+        dep_iata TEXT,
+        arr_iata TEXT,
+        scheduled_dep TEXT,
+        scheduled_arr TEXT,
+        actual_dep TEXT,
+        actual_arr TEXT,
+        UNIQUE(flight_number, scheduled_dep, dep_iata, arr_iata)
+    );
+    """)
+
     # delays table: refs flights by flight_id
     cur.execute("""
     CREATE TABLE IF NOT EXISTS Delays (
@@ -47,4 +63,3 @@ def create_tables(conn):
     """)
     conn.commit()
 
-    

@@ -9,7 +9,6 @@ Output: inserts data into WeatherData table (checks duplicates)
 """
 
 # open sql connection to access column names
-
 import sqlite3
 db_filename = "dawgs_project.db"
 
@@ -17,3 +16,35 @@ def sql_conn(db_file=db_filename):
     conn = sqlite3.connect(db_file)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+# create tables for weather (openweather api), flights and delays (aviationstack)
+def create_tables(conn):
+
+    # weather table: one row per date/city
+    cur = conn.cursor("""
+    CREATE TABLE IF NOT EXISTS Weather (
+        weather_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        city TEXT NOT NULL,
+        temp_c REAL,
+        humidity INTEGER,
+        wind_speed REAL,
+        description TEXT,
+        UNIQUE(date, city, description)
+    );
+    """)
+
+    # delays table: refs flights by flight_id
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS Delays (
+        delay_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        flight_id INTEGER,
+        delay_minutes INTEGER,
+        reason TEXT,
+        FOREIGN KEY(flight_id) REFERENCES Flights(flight_id)
+    );
+    """)
+    conn.commit()
+
+    

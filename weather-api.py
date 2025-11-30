@@ -52,5 +52,47 @@ def get_weather_for_day(year, month, day):
 
     return response.json()
 
+def summarize_weather(json_data): # api request function returns a json object
+    if json_data is None:
+        return None
+
+    hourly = json_data.get("hourly", [])
+    if len(hourly) == 0:
+        return None
+
+    temps = []
+    humidities = []
+    winds = []
+    descriptions = []
+
+    for h in hourly:
+        temps.append(h.get("temp"))
+        humidities.append(h.get("humidity"))
+        winds.append(h.get("wind_speed"))
+
+        weather_list = h.get("weather", [])
+        if len(weather_list) > 0:
+            descriptions.append(weather_list[0].get("description"))
+
+    # summarizing calculations
+    temp_avg = sum(temps) / len(temps)
+    hum_avg = sum(humidities) / len(humidities)
+    wind_avg = sum(winds) / len(winds)
+
+    # most common weather description
+    most_common_desc = None
+    highest_count = 0
+
+    for d in descriptions:
+        count_of_d = descriptions.count(d)
+
+        if count_of_d > highest_count:
+            highest_count = count_of_d
+            most_common_desc = d
+
+    timestamp = hourly[0]["dt"]
+
+    return date_str, temp_avg, hum_avg, wind_avg, most_common_desc
+
 if __name__ == "__main__":
     todays_str = datetime.date.today().strftime("%Y-%m-%d")

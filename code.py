@@ -20,7 +20,6 @@ def sql_conn(db_file=db_filename):
 
 # create tables for weather (openweather api), flights and delays (aviationstack)
 def create_tables(conn):
-
     # weather table: one row per date/city
     cur = conn.cursor("""
     CREATE TABLE IF NOT EXISTS Weather (
@@ -71,3 +70,28 @@ def insert_weather(conn, date, city, temp_c, humidity, wind_speed, description):
         VALUES (?, ?, ?, ?, ?, ?)""", (date, city, temp_c, humidity, wind_speed, description))
     conn.commit()
     return True
+
+def insert_flight_and_delay(conn, flight_number, airline, dep_iata, arr_iata,
+                            scheduled_dep, scheduled_arr, actual_dep, actual_arr,
+                            delay_minutes, reason):
+    cur = conn.cursor()
+
+    cur.execute("""
+        INSERT INTO Flights (flight_number, airline, dep_iata, arr_iata,
+                                scheduled_dep, scheduled_arr, actual_dep, actual_arr)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (flight_number, airline, dep_iata, arr_iata, scheduled_dep, scheduled_arr, actual_dep, actual_arr))
+    conn.commit()
+    flight_id = cur.lastrowid
+
+    # insert delay row
+    cur.execute("""
+        INSERT INTO Delays (flight_id, delay_minutes, reason)
+        SELECT ?, ?, ?
+        WHERE NOT EXISTS (
+            SELECT 1 FROM Delays WHERE flight_id = ? AND delay_minutes = ? AND reason = ?
+        )
+    """, (flight_id, delay_minutes, reason, flight_id, delay_minutes, reason))
+    conn.commit()
+
+    return flight_id

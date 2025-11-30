@@ -63,3 +63,11 @@ def create_tables(conn):
     """)
     conn.commit()
 
+def insert_weather(conn, date, city, temp_c, humidity, wind_speed, description):
+    """insert one unique weather row; return True if successfully inserted"""
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO Weather (date, city, temp_c, humidity, wind_speed, description)
+        VALUES (?, ?, ?, ?, ?, ?)""", (date, city, temp_c, humidity, wind_speed, description))
+    conn.commit()
+    return True

@@ -1,6 +1,6 @@
 import requests
-import sqlite3
 import datetime
+import sqlite3
 
 import os
 from dotenv import load_dotenv
@@ -42,5 +42,27 @@ def get_weather_data(city, month):
             "wind_speed": entry["wind"]["speed"],
             "description": w})
 
-    print(f"code collected {len(weather_list)} weather entries")
+#    print(f"code collected {len(weather_list)} weather entries")
+
     return weather_list
+
+
+def store_weather_data(conn, weather_list):
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS WeatherData (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            datetime INTEGER UNIQUE,
+            temp REAL,
+            humidity REAL,
+            wind_speed REAL,
+            description TEXT)""")
+
+    for w in weather_list:
+        try:
+            cur.execute("""INSERT OR IGNORE INTO WeatherData (datetime, temp, humidity, wind_speed, description)
+                VALUES (?, ?, ?, ?, ?)""", (w["datetime"], w["temp"], w["humidity"], w["wind_speed"], w["description"]))
+        except Exception as e:
+            print("Insert error:", e)
+
+    conn.commit()

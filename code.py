@@ -79,8 +79,7 @@ def insert_flight_and_delay(conn, flight_number, airline, dep_iata, arr_iata,
     cur.execute("""
         INSERT INTO Flights (flight_number, airline, dep_iata, arr_iata,
                                 scheduled_dep, scheduled_arr, actual_dep, actual_arr)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (flight_number, airline, dep_iata, arr_iata, scheduled_dep, scheduled_arr, actual_dep, actual_arr))
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", (flight_number, airline, dep_iata, arr_iata, scheduled_dep, scheduled_arr, actual_dep, actual_arr))
     conn.commit()
     flight_id = cur.lastrowid
 
@@ -95,3 +94,4 @@ def insert_flight_and_delay(conn, flight_number, airline, dep_iata, arr_iata,
     conn.commit()
 
     return flight_id
+

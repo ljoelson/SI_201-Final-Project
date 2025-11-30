@@ -7,7 +7,7 @@ import datetime
 import time
 
 load_dotenv()
-api_key = os.getenv("API_KEY")
+weatherapi_key = os.getenv("API_KEY")
 CITY = "Detroit"
 LAT = 42.3314
 LON = -83.0458
@@ -38,16 +38,19 @@ def get_weather_for_day(year, month, day):
     unix_time = int(dt.timestamp())
 
     url = "https://api.openweathermap.org/data/2.5/onecall/timemachine"
-
     params = {
         "lat": LAT,
         "lon": LON,
         "dt": unix_time,
-        "appid": OPENWEATHER_KEY,
+        "appid": weatherapi_key,
         "units": "metric"}
     response = requests.get(url, params=params)
+
     if response.status_code != 200:
         print("Error:", response.text[:200])
         return None
 
     return response.json()
+
+if __name__ == "__main__":
+    todays_str = datetime.date.today().strftime("%Y-%m-%d")

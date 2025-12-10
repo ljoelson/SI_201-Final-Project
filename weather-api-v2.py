@@ -10,12 +10,12 @@ weatherapi_key = os.getenv("API_KEY")
 
 def get_weather_data(city, month):
 
-    # random detroit lat/lon
+    # random detroit lat/lon coordinates
     lat, lon = 42.3314, -83.0458
 
     # build time range for the given month
     start_date = datetime.datetime(2024, month, 1)
-    end_date = start_date + datetime.timedelta(days=25)  # ensure <=25 entries per run
+    end_date = start_date + datetime.timedelta(days=25)  # ensures <=25 entries per run!!!!
 
     url = (
         f"https://history.openweathermap.org/data/2.5/history/city?"
@@ -66,3 +66,4 @@ def store_weather_data(conn, weather_list):
             print("Insert error:", e)
 
     conn.commit()
+    print("Weather data stored successfully!")

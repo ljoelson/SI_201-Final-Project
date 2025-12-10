@@ -1,37 +1,41 @@
 import requests
 import sqlite3
-from datetime import datetime
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 weatherapi_key = os.getenv("API_KEY")
 
-# access data for most recently stored timestamp
-def get_last_timestamp(conn):
-    cur = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS WeatherData (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            datetime INTEGER UNIQUE,
-            temp REAL,
-            humidity REAL,
-            wind_speed REAL,
-            description TEXT
-        )
-    """)
-    cur.execute("SELECT MAX(datetime) FROM WeatherData")
-    row = cur.fetchone()
-    return row[0]
+# # access data for most recently stored timestamp
+# def get_last_timestamp(conn):
+#     cur = conn.cursor()
+#     cur.execute("""
+#         CREATE TABLE IF NOT EXISTS WeatherData (
+#             id INTEGER PRIMARY KEY AUTOINCREMENT,
+#             city TEXT,
+#             datetime INTEGER,
+#             temp REAL,
+#             humidity REAL,
+#             wind_speed REAL,
+#             description TEXT,
+#             UNIQUE(city, datetime)
+#         )
+#     """)
+#     cur.execute("SELECT MAX(datetime) FROM WeatherData")
+#     row = cur.fetchone()
+#     return row[0]
 
-def get_weather_data(city, conn):
+def get_weather_data(city_name, conn):
 
     print("fetching weather data")
     print("debug api key:", weatherapi_key)
 
+    # random detroit coordinates
+    lat, lon = 42.3314, -83.0458
+
     url = (
-        "https://api.openweathermap.org/data/2.5/forecast"
-        f"?q={city}&appid={weatherapi_key}"
+        f"https://api.openweathermap.org/data/2.5/forecast"
+        f"?lat={lat}&lon={lon}&appid={weatherapi_key}"
     )
 
     response = requests.get(url)
@@ -46,17 +50,17 @@ def get_weather_data(city, conn):
 
     weather_list = []
 
-    for entry in data["list"]:
+    for entry in data["list"][:25]:
         main = entry["main"]
-        wind = entry.get("wind", {})
-        weather_desc = entry["weather"][0]["description"]
+        weather = entry["weather"][0]
+        wind = entry["wind"]
 
         weather_list.append({
-            "datetime": entry["dt"], # UNIX timestamp
+            "datetime": entry["dt"], # Unix timestamp
             "temp": main["temp"],
             "humidity": main["humidity"],
-            "wind_speed": wind.get("speed"),
-            "description": weather_desc
+            "wind_speed": wind["speed"],
+            "description": weather["description"]
         })
 
     print(f"Collected {len(weather_list)} forecast rows.")
@@ -68,11 +72,13 @@ def store_weather_data(conn, weather_list):
     cur.execute("""
         CREATE TABLE IF NOT EXISTS WeatherData (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            datetime INTEGER UNIQUE,
+            datetime INTEGER,
             temp REAL,
             humidity REAL,
             wind_speed REAL,
-            description TEXT)""")
+            description TEXT
+        )
+    """)
 
     for w in weather_list:
         try:

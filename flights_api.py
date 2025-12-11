@@ -106,7 +106,7 @@ def store_flight_data(db_conn, flights_list):
     
     # Flight delays table
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS flight_delays (
+        CREATE TABLE IF NOT EXISTS FlightDelays (
             delay_id INTEGER PRIMARY KEY AUTOINCREMENT,
             flight_id INTEGER NOT NULL,
             delay_minutes INTEGER,
@@ -164,7 +164,6 @@ if __name__ == "__main__":
     print()
     
     airport_code = "DTW"
-    db_name = "flight_delays.db"
     
     flights = get_flight_data(airport_code, month=None)
     

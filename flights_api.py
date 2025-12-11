@@ -110,7 +110,7 @@ def store_flight_data(db_conn, flights_list):
             delay_id INTEGER PRIMARY KEY AUTOINCREMENT,
             flight_id INTEGER NOT NULL,
             delay_minutes INTEGER,
-            FOREIGN KEY (flight_id) REFERENCES flights (flight_id)
+            FOREIGN KEY (flight_id) REFERENCES Flights (flight_id)
         )
     ''')
     
@@ -120,7 +120,7 @@ def store_flight_data(db_conn, flights_list):
     for flight in flights_list:
         try:
             cursor.execute('''
-                INSERT INTO flights (
+                INSERT INTO Flights (
                     flight_number, airline, departure_airport, arrival_airport,
                     scheduled_departure, actual_departure, scheduled_arrival, 
                     actual_arrival, flight_status
@@ -184,7 +184,7 @@ if __name__ == "__main__":
         store_flight_data(db_connection, flights)
         
         cursor = db_connection.cursor()
-        cursor.execute("SELECT COUNT(*) FROM flights")
+        cursor.execute("SELECT COUNT(*) FROM Flights")
         total = cursor.fetchone()[0]
         
         print()

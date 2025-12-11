@@ -6,25 +6,6 @@ from dotenv import load_dotenv
 load_dotenv()
 weatherapi_key = os.getenv("API_KEY")
 
-# # access data for most recently stored timestamp
-# def get_last_timestamp(conn):
-#     cur = conn.cursor()
-#     cur.execute("""
-#         CREATE TABLE IF NOT EXISTS WeatherData (
-#             id INTEGER PRIMARY KEY AUTOINCREMENT,
-#             city TEXT,
-#             datetime INTEGER,
-#             temp REAL,
-#             humidity REAL,
-#             wind_speed REAL,
-#             description TEXT,
-#             UNIQUE(city, datetime)
-#         )
-#     """)
-#     cur.execute("SELECT MAX(datetime) FROM WeatherData")
-#     row = cur.fetchone()
-#     return row[0]
-
 def get_weather_data(city_name, conn):
 
     print("fetching weather data")
@@ -89,3 +70,4 @@ def store_weather_data(conn, weather_list):
 
     conn.commit()
     print("Weather data stored successfully!")
+

@@ -89,7 +89,7 @@ def store_flight_data(db_conn, flights_list):
     
     #Flights table
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS flights (
+        CREATE TABLE IF NOT EXISTS Flights (
             flight_id INTEGER PRIMARY KEY AUTOINCREMENT,
             flight_number TEXT NOT NULL,
             airline TEXT NOT NULL,
@@ -158,10 +158,13 @@ def store_flight_data(db_conn, flights_list):
 
 
 if __name__ == "__main__":
+    print("=" * 60)
     print("FLIGHT DATA COLLECTION")
+    print("=" * 60)
     print()
     
     airport_code = "DTW"
+    db_name = "flight_delays.db"
     
     flights = get_flight_data(airport_code, month=None)
     
@@ -191,6 +194,9 @@ if __name__ == "__main__":
             print(f"   Need {100 - total} more to reach 100")
             print(f"   Run this script again to collect more!")
         else:
-            print(f"   Goal reached! (100+)")
+            print(f"   ✓ Goal reached! (100+)")
         
         db_connection.close()
+    
+    print()
+    print("=" * 60)

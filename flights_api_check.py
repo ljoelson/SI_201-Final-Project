@@ -1,8 +1,3 @@
-"""
-Test script to check what data AviationStack API is returning
-Run this first to debug your API connection
-"""
-
 import requests
 import os
 from dotenv import load_dotenv

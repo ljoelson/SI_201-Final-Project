@@ -44,8 +44,6 @@ def get_weather_data(city_name, conn):
     response = requests.get(url)
     data = response.json()
 
-    # print("DEBUG top-level keys:", data.keys())
-
     if "list" not in data:
         print("Error: API did not include 'list'. Full response:")
         print(data)
@@ -96,16 +94,18 @@ def store_weather_data(conn, weather_list):
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (w["fetch_date"], w["datetime"], w["temp"], w["humidity"], w["wind_speed"], w["description"]))
             
-            if cur.rowcount > 0:
-                inserted += 1
-            else:
-                skipped += 1
+            # # count num of skipped/inserted
+            # if cur.rowcount > 0:
+            #     inserted += 1
+            # else:
+            #     skipped += 1
 
         except Exception as e:
             print("Insert error:", e)
 
     conn.commit()
-    print(f"Weather data stored! Inserted: {inserted}, Skipped (duplicates): {skipped}")
+    print(f"Weather data successfully stored")
+    # print(f"Inserted: {inserted}, Skipped (duplicates): {skipped}")
 
 if __name__ == "__main__":
     conn = sqlite3.connect(DB_NAME)

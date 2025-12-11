@@ -41,4 +41,7 @@ def calc_avg_delay_precip(db_conn):
         avg_delay = sum(delays) / len(delays)
         print(f"Average departure delay during precipitation: {avg_delay:.2f} minutes")
 
+    print(avg_delay)
+    
     return avg_delay
+

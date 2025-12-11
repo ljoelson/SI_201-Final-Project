@@ -21,7 +21,7 @@ def view_database_summary():
     tables = cur.fetchall()
     
     if not tables:
-        print("⚠️  No tables found in database!")
+        print("No tables found in database!")
         print("Run weather_api.py and flights_api.py first to create tables.")
         conn.close()
         return

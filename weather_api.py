@@ -24,7 +24,6 @@ def get_next_fetch_date(conn):
     
     # parses last date + 1d
     last_date = datetime.strptime(result[0], "%Y-%m-%d")
-
     next_date = last_date + timedelta(days=1)
     return next_date.strftime("%Y-%m-%d")
 
@@ -72,9 +71,31 @@ def get_weather_data(city_name, conn):
     print(f"Collected {len(weather_list)} forecast rows (fetched on {fetch_date}).")
     return weather_list
 
+def description_id(conn, description):
+    # create or get id for descr to avoid dup str
+    cur = conn.cursor()
+    
+    # existing descr
+    cur.execute("SELECT id FROM Descriptions WHERE description = ?", (description,))
+    result = cur.fetchone()
+    
+    if result:
+        return result[0]
+    
+    # descr doesn't exist, insert it
+    cur.execute("INSERT INTO Descriptions (description) VALUES (?)", (description,))
+    return cur.lastrowid
 
 def store_weather_data(conn, weather_list):
     cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS Descriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            description TEXT UNIQUE
+        )
+    """)
+    
     cur.execute("""
         CREATE TABLE IF NOT EXISTS WeatherData (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,7 +105,8 @@ def store_weather_data(conn, weather_list):
             humidity REAL,
             wind_speed REAL,
             description TEXT,
-            UNIQUE(fetch_date, datetime)
+            UNIQUE(fetch_date, datetime),
+            FOREIGN KEY (description_id) REFERENCES Descriptions(id)
         )
     """)
 
@@ -93,9 +115,10 @@ def store_weather_data(conn, weather_list):
 
     for w in weather_list:
         try:
-            cur.execute("""INSERT OR IGNORE INTO WeatherData (fetch_date, datetime, temp, humidity, wind_speed, description)
+            descr_id = description_id(conn, w["description"]) # prevent dupes
+            cur.execute("""INSERT OR IGNORE INTO WeatherData (fetch_date, datetime, temp, humidity, wind_speed, descr_id)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (w["fetch_date"], w["datetime"], w["temp"], w["humidity"], w["wind_speed"], w["description"]))
+            """, (w["fetch_date"], w["datetime"], w["temp"], w["humidity"], w["wind_speed"], w["descr_id"]))
             
             if cur.rowcount > 0:
                 inserted += 1

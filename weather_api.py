@@ -8,8 +8,8 @@ weatherapi_key = os.getenv("API_KEY")
 
 def get_weather_data(city_name, conn):
 
-    print("fetching weather data")
-    print("debug api key:", weatherapi_key)
+    # print("fetching weather data")
+    # print("debug api key:", weatherapi_key)
 
     # random detroit coordinates
     lat, lon = 42.3314, -83.0458
@@ -70,4 +70,3 @@ def store_weather_data(conn, weather_list):
 
     conn.commit()
     print("Weather data stored successfully!")
-

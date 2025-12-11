@@ -1,7 +1,6 @@
-
 import os
 import sqlite3
-from weather_api_v2 import get_weather_data, store_weather_data
+from weather_api import get_weather_data, store_weather_data
 
 DB_NAME = "final_project.db"
 

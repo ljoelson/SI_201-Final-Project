@@ -9,30 +9,31 @@ def calc_avg_delay_precip(db_conn):
     
     precip = ['rain', 'snow', 'drizzle', 'sleet', 'hail']
     
-    # join flight + weather by closest timestamp before flight
+    # Join flight delays with weather data
+    # Match flights to weather records from the same fetch_date
     flight_weather_sql = """
-        SELECT F.departure_delay, W.description
+        SELECT fd.delay_minutes, W.description
         FROM Flights F
+        JOIN flight_delays fd ON F.flight_id = fd.flight_id
         JOIN WeatherData W
-          ON W.datetime = (
-               SELECT MAX(datetime)
-               FROM WeatherData
-               WHERE datetime <= F.scheduled_departure
-          )
+          ON DATE(F.scheduled_departure) = W.fetch_date
+        WHERE fd.delay_minutes IS NOT NULL
+          AND W.description IS NOT NULL
     """
 
     cur.execute(flight_weather_sql)
     rows = cur.fetchall()
+    
+    if not rows:
+        print("No flight data with weather information found.")
+        return None
 
-    # check if any precip word in weather descrps
+    # Check if any precip word in weather descriptions
     delays = []
     for delay, desc in rows:
-        if desc is None:
-            continue
         desc_lower = desc.lower()
         if any(term in desc_lower for term in precip):
-            if delay is not None:
-                delays.append(delay)
+            delays.append(delay)
 
     if len(delays) == 0:
         print("No precipitation-related flights found.")
@@ -40,8 +41,6 @@ def calc_avg_delay_precip(db_conn):
     else:
         avg_delay = sum(delays) / len(delays)
         print(f"Average departure delay during precipitation: {avg_delay:.2f} minutes")
-
-    print(avg_delay)
-    
-    return avg_delay
-
+        print(f"Total flights during precipitation: {len(delays)}")
+        print(avg_delay)
+        return avg_delay

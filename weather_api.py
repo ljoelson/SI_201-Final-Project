@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 load_dotenv()
 weatherapi_key = os.getenv("API_KEY")
+DB_NAME = "project_data.db"
 
 # access data across diff days
 def get_next_fetch_date(conn):
@@ -107,7 +108,7 @@ def store_weather_data(conn, weather_list):
     print(f"Weather data stored! Inserted: {inserted}, Skipped (duplicates): {skipped}")
 
 if __name__ == "__main__":
-    conn = sqlite3.connect("project_data.db")
+    conn = sqlite3.connect(DB_NAME)
     weather_data = get_weather_data("Detroit", conn)
     store_weather_data(conn, weather_data)
     conn.close()

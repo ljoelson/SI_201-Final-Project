@@ -5,6 +5,7 @@ import sqlite3
 from datetime import datetime
 
 load_dotenv()
+DB_NAME = "project_data.db"
 
 
 def get_flight_data(airport, month=None):
@@ -157,13 +158,10 @@ def store_flight_data(db_conn, flights_list):
 
 
 if __name__ == "__main__":
-    print("=" * 60)
     print("FLIGHT DATA COLLECTION")
-    print("=" * 60)
     print()
     
     airport_code = "DTW"
-    db_name = "project_data.db"
     
     flights = get_flight_data(airport_code, month=None)
     
@@ -179,7 +177,7 @@ if __name__ == "__main__":
         print("To try a different airport, edit this file and change:")
         print("  airport_code = 'DTW'  -->  airport_code = 'JFK'")
     else:
-        db_connection = sqlite3.connect(db_name)
+        db_connection = sqlite3.connect(DB_NAME)
         store_flight_data(db_connection, flights)
         
         cursor = db_connection.cursor()
@@ -193,9 +191,6 @@ if __name__ == "__main__":
             print(f"   Need {100 - total} more to reach 100")
             print(f"   Run this script again to collect more!")
         else:
-            print(f"   ✓ Goal reached! (100+)")
+            print(f"   Goal reached! (100+)")
         
         db_connection.close()
-    
-    print()
-    print("=" * 60)

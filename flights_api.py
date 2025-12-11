@@ -163,7 +163,7 @@ if __name__ == "__main__":
     print()
     
     airport_code = "DTW"
-    db_name = "flight_delays.db"
+    db_name = "project_data.db"
     
     flights = get_flight_data(airport_code, month=None)
     

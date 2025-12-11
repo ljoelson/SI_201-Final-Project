@@ -7,6 +7,10 @@ from datetime import datetime, timedelta
 load_dotenv()
 weatherapi_key = os.getenv("API_KEY")
 
+# Single database name for entire project
+DB_NAME = "project_data.db"
+
+
 # access data across diff days
 def get_next_fetch_date(conn):
     try:
@@ -54,14 +58,19 @@ def get_weather_data(city_name, conn):
 
     fetch_date = get_next_fetch_date(conn)
 
+    # Limit to 25 items per run as per project requirements
     for entry in data["list"][:25]:
         main = entry["main"]
         weather = entry["weather"][0]
         wind = entry["wind"]
 
+        # Convert Unix timestamp to ISO format string for easier joining with flight data
+        dt_obj = datetime.utcfromtimestamp(entry["dt"])
+        datetime_str = dt_obj.strftime("%Y-%m-%dT%H:%M:%S")
+
         weather_list.append({
             "fetch_date": fetch_date,
-            "datetime": entry["dt"], # Unix timestamp
+            "datetime": datetime_str,  # Changed to string format for easier comparison
             "temp": main["temp"],
             "humidity": main["humidity"],
             "wind_speed": wind["speed"],
@@ -71,13 +80,14 @@ def get_weather_data(city_name, conn):
     print(f"Collected {len(weather_list)} forecast rows (fetched on {fetch_date}).")
     return weather_list
 
+
 def store_weather_data(conn, weather_list):
     cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS WeatherData (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             fetch_date TEXT,
-            datetime INTEGER,
+            datetime TEXT,
             temp REAL,
             humidity REAL,
             wind_speed REAL,
@@ -105,9 +115,20 @@ def store_weather_data(conn, weather_list):
 
     conn.commit()
     print(f"Weather data stored! Inserted: {inserted}, Skipped (duplicates): {skipped}")
+    
+    # Show progress
+    cur.execute("SELECT COUNT(*) FROM WeatherData")
+    total = cur.fetchone()[0]
+    print(f"📊 Total weather records in database: {total}")
+    if total < 100:
+        print(f"   Need {100 - total} more to reach 100")
+        print(f"   Run this script again to collect more!")
+    else:
+        print(f"   ✓ Goal reached! (100+)")
+
 
 if __name__ == "__main__":
-    conn = sqlite3.connect("project_data.db")
+    conn = sqlite3.connect(DB_NAME)
     weather_data = get_weather_data("Detroit", conn)
     store_weather_data(conn, weather_data)
     conn.close()

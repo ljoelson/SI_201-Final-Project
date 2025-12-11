@@ -107,6 +107,8 @@ def store_weather_data(conn, weather_list):
     print(f"Weather data successfully stored")
     # print(f"Inserted: {inserted}, Skipped (duplicates): {skipped}")
 
+
+
 if __name__ == "__main__":
     conn = sqlite3.connect(DB_NAME)
     weather_data = get_weather_data("Detroit", conn)

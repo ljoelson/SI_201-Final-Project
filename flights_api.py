@@ -158,10 +158,7 @@ def store_flight_data(db_conn, flights_list):
 
 
 if __name__ == "__main__":
-    print("=" * 60)
     print("FLIGHT DATA COLLECTION")
-    print("=" * 60)
-    print()
     
     airport_code = "DTW"
     
@@ -169,15 +166,7 @@ if __name__ == "__main__":
     
     if not flights:
         print()
-        print("⚠️  No flights found for DTW.")
-        print()
-        print("TROUBLESHOOTING:")
-        print("1. Run: python test_aviationstack_api.py")
-        print("2. Try a busier airport: JFK, LAX, or ORD")
-        print("3. Check your API rate limit (500 calls/month)")
-        print()
-        print("To try a different airport, edit this file and change:")
-        print("  airport_code = 'DTW'  -->  airport_code = 'JFK'")
+        print("No flights found for DTW.")
     else:
         db_connection = sqlite3.connect(DB_NAME)
         store_flight_data(db_connection, flights)
@@ -190,10 +179,9 @@ if __name__ == "__main__":
         print(f"Total flights in database: {total}")
         
         if total < 100:
-            print(f"   Need {100 - total} more to reach 100")
-            print(f"   Run this script again to collect more!")
+            print(f"   Need {100 - total} more to reach 100. Run this script again")
         else:
-            print(f"   ✓ Goal reached! (100+)")
+            print(f"Over 100 rows reached!")
         
         db_connection.close()
     

@@ -104,7 +104,7 @@ if __name__ == "__main__":
     delay_hours = 3
 
     for i in range(num_fetches):
-        print(f"Fetch {i+1}/{num_fetches}")
+        # print(f"Fetch {i+1}/{num_fetches}")
         weather_data = get_weather_data("Detroit")
 
         if weather_data:

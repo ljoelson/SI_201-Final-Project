@@ -36,7 +36,7 @@ def calc_avg_delay_precip(db_conn):
     precip_condition = " OR ".join([f"LOWER(description) LIKE '%{term}%'" for term in precip])
     cur.execute(f"SELECT COUNT(*) FROM WeatherData WHERE {precip_condition}")
     precip_count = cur.fetchone()[0]
-    print(f"Weather records with precipitation: {precip_count}")
+    print(f"Weather records with precipitation: {precip_count}/n")
     
     # all delays w any weather
     flight_weather_sql = """
@@ -79,7 +79,7 @@ def calc_avg_delay_precip(db_conn):
     cur.execute(flight_weather_sql)
     rows = cur.fetchall()
     
-    print(f"\nTotal flight-weather combinations: {len(rows)}")
+    print(f"Total flight-weather combinations: {len(rows)}")
     
     # **** if any precip word in weather descriptions, get avg
     delays = []
@@ -89,13 +89,13 @@ def calc_avg_delay_precip(db_conn):
             delays.append(delay)
 
     if len(delays) == 0:
-        print("No precipitation-related flights found.")
+        print("No precipitation-related flights found.\n")
         return None
     else:
         avg_delay = sum(delays) / len(delays)
-        print(f"\nRESULTS:")
-        print(f"  Total flights during precipitation: {len(delays)}")
-        print(f"  Average departure delay during precipitation: {avg_delay:.2f} minutes")
+        print(f"Results:")
+        print(f"Total flights during precipitation: {len(delays)}")
+        print(f"Average departure delay during precipitation: {avg_delay:.2f} minutes")
         return avg_delay
     
 

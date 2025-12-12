@@ -8,26 +8,6 @@ load_dotenv()
 weatherapi_key = os.getenv("API_KEY")
 DB_NAME = "project_data.db"
 
-# access data across diff days
-# def get_next_fetch_date(conn):
-#     try:
-#         cur = conn.cursor()
-#         cur.execute("""
-#             SELECT fetch_date FROM WeatherData 
-#             ORDER BY fetch_date DESC LIMIT 1
-#         """)
-#         result = cur.fetchone()
-#     except sqlite3.OperationalError:
-#         return "2025-12-01"
-        
-#     if result is None: # table doesn't exist yet; return starting date
-#         return "2025-12-01"
-    
-#     # parses last date + 1d
-#     last_date = datetime.strptime(result[0], "%Y-%m-%d")
-#     next_date = last_date + timedelta(days=1)
-#     return next_date.strftime("%Y-%m-%d")
-
 
 def get_weather_data(city_name):
 
@@ -56,8 +36,6 @@ def get_weather_data(city_name):
             weather_list = []
             fetch_timestamp = datetime.now().isoformat()
 
-        # fetch_date = get_next_fetch_date(conn)
-
             for entry in data["list"][:25]:
                 main = entry["main"]
                 weather = entry["weather"][0]
@@ -72,7 +50,6 @@ def get_weather_data(city_name):
                     "description": weather["description"]
                 })
 
-            # print(f"Collected {len(weather_list)} forecast rows (fetched on {fetch_date}).")
             print(f"Collected {len(weather_list)} forecast rows")
             return weather_list
     
@@ -113,15 +90,10 @@ def store_weather_data(conn, weather_list):
         except sqlite3.IntegrityError:
             skipped += 1
             
-            # # count num of skipped/inserted
-            # if cur.rowcount > 0:
-            #     inserted += 1
-            # else:
-            #     skipped += 1
 
     conn.commit()
     print(f"Weather data successfully stored")
-    # print(f"Inserted: {inserted}, Skipped (duplicates): {skipped}")
+    print(f"Inserted: {inserted}, Skipped (duplicates): {skipped}")
 
 
 

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 def plot_avg_delay_by_hour(db_name="project_data.db"):
-    """Plot average flight delay by hour of day"""
+    # Plot average flight delay by hour of day
     
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
@@ -56,7 +56,7 @@ def plot_avg_delay_by_hour(db_name="project_data.db"):
 
 
 def plot_avg_precipitation_by_hour(db_name="project_data.db"):
-    """Plot percentage of rainy weather by hour of day"""
+    # Plot percentage of rainy weather by hour of day
     
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()

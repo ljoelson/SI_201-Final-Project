@@ -22,7 +22,7 @@ def get_weather_data(city_name):
     )
 
     try:
-        print(f"Fetching real-time weather data for {city_name}...")
+        print(f"Fetching real-time weather data for {city_name}")
         response = requests.get(url)
         
         if response.status_code == 200:
@@ -90,7 +90,6 @@ def store_weather_data(conn, weather_list):
         except sqlite3.IntegrityError:
             skipped += 1
             
-
     conn.commit()
     print(f"Weather data successfully stored")
     print(f"Inserted: {inserted}, Skipped (duplicates): {skipped}")
@@ -98,28 +97,32 @@ def store_weather_data(conn, weather_list):
 
 
 if __name__ == "__main__":
+    import time
     conn = sqlite3.connect(DB_NAME)
+
+    num_fetches = 4
+    delay_hours = 3
+
+    for i in range(num_fetches):
+        print(f"Fetch {i+1}/{num_fetches}")
+        weather_data = get_weather_data("Detroit")
+
+        if weather_data:
+            store_weather_data(conn, weather_data)
+        
+        if i < num_fetches - 1:
+            print(f"Wait {delay_hours} hours before next run to fetch new data")
+            time.sleep(delay_hours * 3600)  # convert hrs to s
+    
     cur = conn.cursor()
-    cur.execute("DROP TABLE IF EXISTS WeatherData")
-    conn.commit()
+    cur.execute("SELECT COUNT(*) FROM WeatherData")
+    total = cur.fetchone()[0]
 
-    weather_data = get_weather_data("Detroit")
-
-    if not weather_data:
-        print()
-        print("No weather data found")
+    print(f"Total weather records in database: {total}")
+        
+    if total < 100:
+        print(f"Need {100 - total} more to reach 100. Run script again")
     else:
-        store_weather_data(conn, weather_data)
-        
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM WeatherData")
-        total = cur.fetchone()[0]
-        
-        print(f"Total weather records in database: {total}")
-        
-        if total < 100:
-            print(f"   Need {100 - total} more to reach 100. Run script again")
-        else:
-            print(f"   100 reached")
+        print(f"100 reached")
     
     conn.close()

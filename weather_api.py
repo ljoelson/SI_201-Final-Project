@@ -65,7 +65,6 @@ def get_weather_data(city_name):
 
                 weather_list.append({
                     "fetch_timestamp": fetch_timestamp,
-                    # "fetch_date": fetch_date,
                     "datetime": entry["dt"], # Unix timestamp
                     "temp": main["temp"],
                     "humidity": main["humidity"],

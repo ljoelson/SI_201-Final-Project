@@ -27,7 +27,7 @@ def calc_avg_delay_precip(db_conn):
     flight_dates = cur.fetchone()
     print(f"Flight dates range: {flight_dates[0]} to {flight_dates[1]}")
     
-    cur.execute("SELECT MIN(fetch_date), MAX(fetch_date) FROM WeatherData")
+    cur.execute("SELECT MIN(fetch_timestamp), MAX(fetch_timestamp) FROM WeatherData")
     weather_dates = cur.fetchone()
     print(f"Weather dates range: {weather_dates[0]} to {weather_dates[1]}")
     
@@ -44,7 +44,7 @@ def calc_avg_delay_precip(db_conn):
             fd.delay_minutes, 
             W.description,
             F.scheduled_departure,
-            W.fetch_date
+            W.fetch_timestamp
         FROM Flights F
         JOIN FlightDelays fd ON F.flight_id = fd.flight_id
         JOIN WeatherData W

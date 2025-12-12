@@ -18,10 +18,10 @@ def get_next_fetch_date(conn):
         """)
         result = cur.fetchone()
     except sqlite3.OperationalError:
-        return "2024-12-01"
+        return "2025-12-01"
         
     if result is None: # table doesn't exist yet; return starting date
-        return "2024-12-01"
+        return "2025-12-01"
     
     # parses last date + 1d
     last_date = datetime.strptime(result[0], "%Y-%m-%d")

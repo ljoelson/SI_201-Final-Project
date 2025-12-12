@@ -8,7 +8,7 @@ load_dotenv()
 DB_NAME = "project_data.db"
 
 
-def get_flight_data(airport, month=None):
+def get_flight_data(airport, flight_date=None):
     
     api_key = os.getenv('AVIATIONSTACK_API_KEY')
     
@@ -23,9 +23,16 @@ def get_flight_data(airport, month=None):
         'dep_iata': airport,
         'limit': 25, 
     }
-    
+
+    if flight_date:
+        params['flight_date'] = flight_date
+
     try:
-        print(f"Fetching flight data for {airport}...")
+        if flight_date:
+            print(f"Fetching flight data for {airport} on {flight_date}...")
+        else:
+            print(f"Fetching flight data for {airport}...")
+        
         response = requests.get(base_url, params=params)
         
         if response.status_code == 200:
@@ -151,51 +158,63 @@ def store_flight_data(db_conn, flights_list):
     
     db_conn.commit()
     
-    print(f"✓ Inserted {inserted_count} new flights")
-    print(f"✓ Skipped {duplicate_count} duplicates")
+    print(f"Inserted {inserted_count} new flights")
+    print(f"Skipped {duplicate_count} duplicates")
     
     return inserted_count
 
 
 if __name__ == "__main__":
-    print("=" * 60)
     print("FLIGHT DATA COLLECTION")
-    print("=" * 60)
-    print()
     
     airport_code = "DTW"
+    start_date = "2025-12-01"
+    end_date = "2025-12-12"
+
+    db_connection = sqlite3.connect(DB_NAME)
     
-    flights = get_flight_data(airport_code, month=None)
+    from datetime import datetime, timedelta
     
-    if not flights:
-        print()
-        print("⚠️  No flights found for DTW.")
-        print()
-        print("TROUBLESHOOTING:")
-        print("1. Run: python test_aviationstack_api.py")
-        print("2. Try a busier airport: JFK, LAX, or ORD")
-        print("3. Check your API rate limit (500 calls/month)")
-        print()
-        print("To try a different airport, edit this file and change:")
-        print("  airport_code = 'DTW'  -->  airport_code = 'JFK'")
-    else:
-        db_connection = sqlite3.connect(DB_NAME)
-        store_flight_data(db_connection, flights)
+    current_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+
+    total_inserted = 0
+    
+    while current_date <= end:
+        date_str = current_date.strftime("%Y-%m-%d")
+        flights = get_flight_data(airport_code, flight_date=date_str)
         
-        cursor = db_connection.cursor()
-        cursor.execute("SELECT COUNT(*) FROM Flights")
-        total = cursor.fetchone()[0]
+        if flights:
+            inserted = store_flight_data(db_connection, flights)
+            total_inserted += inserted
         
-        print()
-        print(f"Total flights in database: {total}")
+        current_date += timedelta(days=1)
+    
+    cursor = db_connection.cursor()
+    cursor.execute("SELECT COUNT(*) FROM Flights")
+    total = cursor.fetchone()[0]
+    
+    while current_date <= end:
+        date_str = current_date.strftime("%Y-%m-%d")
+        flights = get_flight_data(airport_code, flight_date=date_str)
         
-        if total < 100:
-            print(f"   Need {100 - total} more to reach 100")
-            print(f"   Run this script again to collect more!")
-        else:
-            print(f"   ✓ Goal reached! (100+)")
+        if flights:
+            inserted = store_flight_data(db_connection, flights)
+            total_inserted += inserted
         
-        db_connection.close()
+        current_date += timedelta(days=1)
+    
+    cursor = db_connection.cursor()
+    cursor.execute("SELECT COUNT(*) FROM Flights")
+    total = cursor.fetchone()[0]
     
     print()
-    print("=" * 60)
+    print(f"Total flights in database: {total}")
+    
+    if total < 100:
+        print(f"   Need {100 - total} more to reach 100")
+        print(f"   Extend end date or run again")
+    else:
+        print(f"100+ flights access")
+    
+    db_connection.close()

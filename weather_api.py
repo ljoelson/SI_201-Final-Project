@@ -89,6 +89,7 @@ def store_weather_data(conn, weather_list):
     cur.execute("""
         CREATE TABLE IF NOT EXISTS WeatherData (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fetch_timestamp TEXT,
             datetime INTEGER,
             temp REAL,
             humidity REAL,
@@ -126,6 +127,10 @@ def store_weather_data(conn, weather_list):
 
 if __name__ == "__main__":
     conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("DROP TABLE IF EXISTS WeatherData")
+    conn.commit()
+
     weather_data = get_weather_data("Detroit")
 
     if not weather_data:

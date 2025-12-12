@@ -23,8 +23,6 @@ def get_flight_data(airport, month=None):
         'dep_iata': airport,
         'limit': 25, 
     }
-
-    
     
     try:
         print(f"Fetching flight data for {airport}...")

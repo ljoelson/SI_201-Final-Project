@@ -72,7 +72,7 @@ def store_weather_data(conn, weather_list):
             humidity REAL,
             wind_speed REAL,
             description TEXT,
-            UNIQUE(datetime)
+            UNIQUE(fetch_timestamp, datetime)
         )
     """)
 
@@ -81,9 +81,9 @@ def store_weather_data(conn, weather_list):
 
     for w in weather_list:
         try:
-            cur.execute("""INSERT INTO WeatherData (datetime, temp, humidity, wind_speed, description)
-                VALUES (?, ?, ?, ?, ?)
-            """, (w["datetime"], w["temp"], w["humidity"], w["wind_speed"], w["description"]))
+            cur.execute("""INSERT INTO WeatherData (fetch_timestamp, datetime, temp, humidity, wind_speed, description)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (w["fetch_timestamp"], w["datetime"], w["temp"], w["humidity"], w["wind_speed"], w["description"]))
 
             inserted += 1
 

@@ -61,30 +61,87 @@ def get_weather_data(city_name):
         print(f"Error: {e}")
         return []
 
-def store_weather_data(conn, weather_list):
+# db for integer keys ****************************************************
+def init_database(conn):
     cur = conn.cursor()
+    
+    # weather descriptions
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS WeatherDescriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            description TEXT UNIQUE NOT NULL
+        )
+    """)
+    
+    # fetch timestamps
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS FetchTimestamps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT UNIQUE NOT NULL
+        )
+    """)
+
+    # main table w foreign keys
     cur.execute("""
         CREATE TABLE IF NOT EXISTS WeatherData (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fetch_timestamp TEXT,
-            datetime INTEGER,
+            fetch_timestamp_id INTEGER NOT NULL,
+            datetime INTEGER NOT NULL,
             temp REAL,
             humidity REAL,
             wind_speed REAL,
-            description TEXT,
-            UNIQUE(fetch_timestamp, datetime)
+            description_id INTEGER NOT NULL,
+            FOREIGN KEY (fetch_timestamp_id) REFERENCES FetchTimestamps(id),
+            FOREIGN KEY (description_id) REFERENCES WeatherDescriptions(id),
+            UNIQUE(fetch_timestamp_id, datetime)
         )
     """)
+    
+
+def get_or_create_description_id(cur, description):
+    # get existing description_id or create new
+    cur.execute("SELECT id FROM WeatherDescriptions WHERE description = ?", (description,))
+    row = cur.fetchone()
+    
+    if row:
+        return row[0]
+    else:
+        cur.execute("INSERT INTO WeatherDescriptions (description) VALUES (?)", (description,))
+        return cur.lastrowid
+
+
+def get_or_create_timestamp_id(cur, timestamp):
+    # get existing timestamp_id or create new
+    cur.execute("SELECT id FROM FetchTimestamps WHERE timestamp = ?", (timestamp,))
+    row = cur.fetchone()
+    
+    if row:
+        return row[0]
+    else:
+        cur.execute("INSERT INTO FetchTimestamps (timestamp) VALUES (?)", (timestamp,))
+        return cur.lastrowid
+    
+
+def store_weather_data(conn, weather_list):
+    cur = conn.cursor()
+    init_database(conn)
 
     inserted = 0 
     skipped = 0
 
     for w in weather_list:
         try:
-            cur.execute("""INSERT INTO WeatherData (fetch_timestamp, datetime, temp, humidity, wind_speed, description)
+            # get or create foreign key ids
+            description_id = get_or_create_description_id(cur, w["description"])
+            timestamp_id = get_or_create_timestamp_id(cur, w["fetch_timestamp"])
+            
+            # insert weather data w foreign keys
+            cur.execute("""
+                INSERT INTO WeatherData 
+                (fetch_timestamp_id, datetime, temp, humidity, wind_speed, description_id)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (w["fetch_timestamp"], w["datetime"], w["temp"], w["humidity"], w["wind_speed"], w["description"]))
-
+            """, (timestamp_id, w["datetime"], w["temp"], w["humidity"], 
+                  w["wind_speed"], description_id))
             inserted += 1
 
         except sqlite3.IntegrityError:

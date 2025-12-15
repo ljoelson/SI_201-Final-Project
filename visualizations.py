@@ -8,15 +8,15 @@ def plot_avg_delay_by_hour(db_name="project_data.db"):
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
     
-    # Avg delay
     query = """
         SELECT 
-            CAST(SUBSTR(f.scheduled_departure, 12, 2) AS INTEGER) as hour,
+            CAST(SUBSTR(T.timestamp, 12, 2) AS INTEGER) as hour,
             AVG(fd.delay_minutes) as avg_delay,
             COUNT(*) as flight_count
-        FROM Flights f
-        JOIN FlightDelays fd ON f.flight_id = fd.flight_id
-        WHERE f.scheduled_departure IS NOT NULL
+        FROM Flights F
+        JOIN FlightDelays fd ON F.flight_id = fd.flight_id
+        JOIN Timestamps T ON F.scheduled_departure_id = T.id
+        WHERE T.timestamp IS NOT NULL
         GROUP BY hour
         ORDER BY hour
     """
@@ -60,23 +60,24 @@ def plot_avg_precipitation_by_hour(db_name="project_data.db"):
     
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
-    
+
     query = """
         SELECT 
-            CAST(STRFTIME('%H', datetime(datetime, 'unixepoch')) AS INTEGER) as hour,
+            CAST(STRFTIME('%H', datetime(W.datetime, 'unixepoch')) AS INTEGER) as hour,
             COUNT(*) as total_records,
             SUM(CASE 
-                WHEN LOWER(description) LIKE '%rain%' 
-                OR LOWER(description) LIKE '%drizzle%'
-                OR LOWER(description) LIKE '%shower%'
-                OR LOWER(description) LIKE '%thunder%'
-                OR LOWER(description) LIKE '%snow%'
-                OR LOWER(description) LIKE '%sleet%'
-                OR LOWER(description) LIKE '%hail%'
+                WHEN LOWER(WD.description) LIKE '%rain%' 
+                OR LOWER(WD.description) LIKE '%drizzle%'
+                OR LOWER(WD.description) LIKE '%shower%'
+                OR LOWER(WD.description) LIKE '%thunder%'
+                OR LOWER(WD.description) LIKE '%snow%'
+                OR LOWER(WD.description) LIKE '%sleet%'
+                OR LOWER(WD.description) LIKE '%hail%'
                 THEN 1 ELSE 0 
             END) as precip_records
-        FROM WeatherData
-        WHERE datetime IS NOT NULL
+        FROM WeatherData W
+        JOIN WeatherDescriptions WD ON W.description_id = WD.id
+        WHERE W.datetime IS NOT NULL
         GROUP BY hour
         ORDER BY hour
     """
@@ -107,7 +108,7 @@ def plot_avg_precipitation_by_hour(db_name="project_data.db"):
     plt.figure(figsize=(14, 6))
     plt.bar(hours, precipitation_pct, color='skyblue', alpha=0.8)
     plt.xlabel('Hour of Day (24-hour format)', fontsize=12)
-    plt.ylabel('Precipitation Conditions (%)', fontsize=12)
+    plt.ylabel('Precipitation Conditions', fontsize=12)
     plt.title('Percentage of Precipitation (Rain/Snow) by Hour of Day', fontsize=14, fontweight='bold')
     plt.xticks(range(0, 24), fontsize=10)
     plt.grid(axis='y', alpha=0.3)
@@ -126,8 +127,6 @@ def plot_avg_precipitation_by_hour(db_name="project_data.db"):
 
 
 if __name__ == "__main__":
-    print("Generating Flight Delay Chart (by hour)...")
     plot_avg_delay_by_hour()
     
-    print("\nGenerating Weather Precipitation Chart (by hour)...")
     plot_avg_precipitation_by_hour()
